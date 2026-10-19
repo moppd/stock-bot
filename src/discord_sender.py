@@ -93,19 +93,19 @@ def send_discord_report(webhook_url: str, market_data: dict, news_items: list, a
     ]
     events = ai_summary.get("watch_events_th") or []
     highlights = ai_summary.get("market_highlights_th") or []
-    section_name = "👀 สิ่งที่ต้องจับตาคืนนี้" if events else "🔥 ประเด็นเด่นที่ต้องจับตา"
+    section_name = "📅 ประเด็นที่ต้องติดตาม" if events else "🔥 ประเด็นร้อน"
     section_items = events if events else highlights
     fields = [
         {"name": "📊 US Index Futures (เช้าเอเชีย)", "value": _truncate("\n".join(futures)), "inline": False},
-        {"name": "📈 ตลาดอ้างอิงสำคัญ", "value": _truncate("\n".join(indicators)), "inline": False},
-        {"name": "💡 ปัจจัยหนุน (Drivers)", "value": _truncate(_lines(ai_summary.get("drivers_th", []))), "inline": True},
-        {"name": "⚠️ ปัจจัยเสี่ยง (Risks)", "value": _truncate(_lines(ai_summary.get("risks_th", []))), "inline": True},
+        {"name": "📈 ตัวชี้วัดตลาดสำคัญ ", "value": _truncate("\n".join(indicators)), "inline": False},
+        {"name": "🟢 ปัจจัยบวกต่อตลาด ", "value": _truncate(_lines(ai_summary.get("drivers_th", []))), "inline": True},
+        {"name": "🔴 ปัจจัยกดดันตลาด ", "value": _truncate(_lines(ai_summary.get("risks_th", []))), "inline": True},
         {"name": section_name, "value": _truncate(_lines(section_items)), "inline": False},
-        {"name": "💻 ข่าว Big Tech & AI", "value": _news_value(ai_summary.get("big_tech_news", []), "ไม่พบข่าว Big Tech ที่ผ่านการคัดเลือกในช่วงเวลานี้"), "inline": False},
-        {"name": "🌍 ข่าวตลาดโลกที่กระทบหุ้นสหรัฐฯ", "value": _news_value(ai_summary.get("global_market_news", []), "ไม่พบข่าวต่างประเทศที่ผ่านการคัดเลือกในช่วงเวลานี้"), "inline": False},
+        {"name": "💻 ความเคลื่อนไหว Big Tech & AI", "value": _news_value(ai_summary.get("big_tech_news", []), "ไม่พบข่าว Big Tech ที่ผ่านการคัดเลือกในช่วงเวลานี้"), "inline": False},
+        # {"name": "🌍 ข่าวตลาดโลก", "value": _news_value(ai_summary.get("global_market_news", []), "ไม่พบข่าวต่างประเทศที่ผ่านการคัดเลือกในช่วงเวลานี้"), "inline": False},
     ]
     embed = {
-        "title": f"🇺🇸 US Futures Morning Brief | {now_str}",
+        "title": f"🇺🇸 ภาพรวม US Futures | {now_str}",
         "description": _truncate(f"**Market Outlook:** `{bias}`\n**{ai_summary.get('headline_th', '')}**\n{ai_summary.get('overview_th', '')}", 4096),
         "color": _bias_color(bias),
         "fields": fields,

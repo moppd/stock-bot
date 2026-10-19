@@ -9,7 +9,7 @@ def _fallback(reason):
     return {
         "market_bias": "ข้อมูลไม่เพียงพอ", "headline_th": "ยังไม่สามารถสรุปแนวโน้มตลาดได้",
         "overview_th": reason, "drivers_th": [], "risks_th": [], "watch_events_th": [],
-        "market_highlights_th": [], "big_tech_news": [], "global_market_news": [],
+        "market_highlights_th": [], "big_tech_news": [],
     }
 
 
@@ -74,7 +74,6 @@ headline_th: พาดหัวภาษาไทยสั้น กระชั
  watch_events_th: array string 0-3 เฉพาะเหตุการณ์คืนนี้ที่ยืนยันวันและเวลาได้จาก input; ไม่มีปฏิทินเศรษฐกิจให้ใช้ [] เสมอ
  market_highlights_th: array string 0-3 ประเด็นสำคัญที่มีแหล่งข่าวชัดเจน ใช้เมื่อ watch_events_th ว่าง
  big_tech_news: array 0-3 objects {article_id,title_th,summary_th,impact_th}
- global_market_news: array 0-2 objects {article_id,title_th,summary_th,impact_th}
 กฎคุณภาพข่าว:
 - title_th เป็นพาดหัวสั้นและเป็นกลาง ไม่ฟันธงผลตอบแทนหรือราคาหุ้น
 - summary_th ต้องให้ข้อเท็จจริงใหม่ที่ต่างจาก title_th โดยระบุสิ่งที่เกิดขึ้นและรายละเอียดจาก input
@@ -110,7 +109,7 @@ headline_th: พาดหัวภาษาไทยสั้น กระชั
             "watch_events_th": [],
             "market_highlights_th": _validate_list(obj.get("market_highlights_th"), 3),
             "big_tech_news": _ground_news(obj.get("big_tech_news"), news_items, 3),
-            "global_market_news": _ground_news(obj.get("global_market_news"), news_items, 2),
+            # "global_market_news": _ground_news(obj.get("global_market_news"), news_items, 2),
         }
         return result
     except Exception as exc:
