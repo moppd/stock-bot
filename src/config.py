@@ -9,7 +9,7 @@ LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
 NEWS_LOOKBACK_HOURS = int(os.getenv("NEWS_LOOKBACK_HOURS", "24"))
-NEWS_MAX_ITEMS = int(os.getenv("NEWS_MAX_ITEMS", "5"))
+NEWS_MAX_ITEMS = int(os.getenv("NEWS_MAX_ITEMS", "24"))
 
 FUTURES_TICKERS = {
     "ES": {"symbol": "ES=F", "name": "E-mini S&P 500"},
