@@ -1,0 +1,6 @@
+yfinance>=0.2.40
+feedparser>=6.0.11
+requests>=2.31.0
+openai>=1.40.0
+python-dateutil>=2.9.0
+pytz>=2024.1

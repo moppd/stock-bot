@@ -1,0 +1,34 @@
+name: US Futures Morning Brief
+
+on:
+  schedule:
+    # 01:00 UTC = 08:00 Asia/Bangkok ทุกวันจันทร์ถึงศุกร์
+    - cron: '0 1 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  run-brief:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Morning Brief Script
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: 'gpt-4o-mini'
+          APP_TIMEZONE: 'Asia/Bangkok'
+        run: |
+          python main.py
