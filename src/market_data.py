@@ -35,7 +35,7 @@ def _fetch_ticker_quote(symbol_id: str, ticker_symbol: str, name: str) -> dict:
         age_hours = (now_utc - last_time.astimezone(timezone.utc)).total_seconds() / 3600.0
         status = "stale/closed" if age_hours > 4 else "live/delayed"
 
-        local_time = last_time.astimezone(TIMEZONE).strftime("%H:%M ICT")
+        local_time = last_time.astimezone(TIMEZONE).strftime("%d/%m/%Y %H:%M น. (เวลาไทย)")
 
         return {
             "symbol": symbol_id,

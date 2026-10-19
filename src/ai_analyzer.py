@@ -1,5 +1,6 @@
 """Generate a Thai analysis grounded in supplied prices and referenced RSS items."""
 import json
+from difflib import SequenceMatcher
 from openai import OpenAI
 from src.config import LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
 
@@ -16,6 +17,19 @@ def _validate_list(value, limit):
     return [str(x)[:350] for x in value[:limit] if isinstance(x, str) and x.strip()] if isinstance(value, list) else []
 
 
+def _normalize_news(text):
+    return "".join(ch.lower() for ch in str(text or "") if ch.isalnum())
+
+
+def _is_redundant(title, summary):
+    title_norm = _normalize_news(title)
+    summary_norm = _normalize_news(summary)
+    if not title_norm or not summary_norm:
+        return False
+    return (title_norm in summary_norm or summary_norm in title_norm
+            or SequenceMatcher(None, title_norm, summary_norm).ratio() >= 0.78)
+
+
 def _ground_news(items, news_items, limit):
     allowed = {item["id"]: item for item in news_items}
     output = []
@@ -28,9 +42,14 @@ def _ground_news(items, news_items, limit):
             continue
         used.add(ident)
         source = allowed[ident]
+        title = str(report.get("title_th", "")).strip()[:170] or source["title"]
+        summary = str(report.get("summary_th", "")).strip()[:600]
+        # Do not show a title restatement as a summary.
+        if _is_redundant(title, summary):
+            summary = ""
         output.append({
-            "title_th": str(report.get("title_th", ""))[:170] or source["title"],
-            "summary_th": str(report.get("summary_th", ""))[:600],
+            "title_th": title,
+            "summary_th": summary,
             "impact_th": str(report.get("impact_th", ""))[:450],
             "article_id": ident,
             "link": source["link"], "published_at": source["published_at"],
@@ -56,6 +75,14 @@ headline_th: พาดหัวภาษาไทยสั้น กระชั
  market_highlights_th: array string 0-3 ประเด็นสำคัญที่มีแหล่งข่าวชัดเจน ใช้เมื่อ watch_events_th ว่าง
  big_tech_news: array 0-3 objects {article_id,title_th,summary_th,impact_th}
  global_market_news: array 0-2 objects {article_id,title_th,summary_th,impact_th}
+กฎคุณภาพข่าว:
+- title_th เป็นพาดหัวสั้นและเป็นกลาง ไม่ฟันธงผลตอบแทนหรือราคาหุ้น
+- summary_th ต้องให้ข้อเท็จจริงใหม่ที่ต่างจาก title_th โดยระบุสิ่งที่เกิดขึ้นและรายละเอียดจาก input
+- ห้ามเขียน summary_th ซ้ำกับ title_th หรือเพียงเติมคำว่า "รายงานว่า" / "คาดการณ์ว่า" / "มีข่าวว่า"
+- impact_th อธิบายกลไกว่าข่าวส่งผลต่อบริษัท/ดัชนีอย่างไร และระบุว่าเป็นความเป็นไปได้เมื่อยังไม่ยืนยัน
+- ข่าวที่มีเพียงพาดหัวหรือข้อมูลไม่พอให้สรุปเชิงลึก ไม่ต้องเลือกข่าวนั้น (ส่ง [] หรือไม่รวมรายการนั้น)
+- แยกเหตุการณ์จริงออกจากคำคาดการณ์/ความเห็นของนักวิเคราะห์อย่างชัดเจน
+- คัดข่าวความสำคัญสูงก่อนบทความคาดเดาราคาหุ้นทั่ว ๆ ไป
 ข่าวทุกเรื่องต้องเลือก article_id จาก input เท่านั้น ห้ามแต่งชื่อข่าว วันที่ บริษัท หรือ URL.
 ข่าว Big Tech ให้เลือกข่าวเทค/AI/ชิปจริง ๆ; ข่าว global ต้องมีเส้นทางผลกระทบต่อหุ้นสหรัฐฯ จริง ๆ
 ถ้าข่าวไม่มีประเด็นสำคัญ ให้ส่ง [] ไม่ต้องใส่ข่าวสมมติ; เน้นความใหม่และความเกี่ยวข้อง ไม่ต้องใช้ทุกข่าว.
