@@ -8,7 +8,7 @@ from src.config import LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
 def _fallback(reason):
     return {
         "market_bias": "ข้อมูลไม่เพียงพอ", "headline_th": "ยังไม่สามารถสรุปแนวโน้มตลาดได้",
-        "overview_th": reason, "drivers_th": [], "risks_th": [], "watch_events_th": [],
+        "overview_th": reason, "watch_events_th": [],
         "market_highlights_th": [], "big_tech_news": [],
     }
 
@@ -69,8 +69,6 @@ def generate_market_outlook(market_data: dict, news_items: list) -> dict:
 market_bias: Bullish/Neutral/Bearish/ข้อมูลไม่เพียงพอ
 headline_th: พาดหัวภาษาไทยสั้น กระชับ
  overview_th: ภาพรวมสรุป 2–3 ประโยค อธิบายทิศทางและความไม่แน่นอน
- drivers_th: array string 0-2 รายการ เฉพาะปัจจัยหนุนที่มีหลักฐาน
- risks_th: array string 0-2 รายการ เฉพาะปัจจัยเสี่ยงที่มีหลักฐาน
  watch_events_th: array string 0-3 เฉพาะเหตุการณ์คืนนี้ที่ยืนยันวันและเวลาได้จาก input; ไม่มีปฏิทินเศรษฐกิจให้ใช้ [] เสมอ
  market_highlights_th: array string 0-3 ประเด็นสำคัญที่มีแหล่งข่าวชัดเจน ใช้เมื่อ watch_events_th ว่าง
  big_tech_news: array 0-3 objects {article_id,title_th,summary_th,impact_th}

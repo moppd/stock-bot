@@ -98,8 +98,8 @@ def send_discord_report(webhook_url: str, market_data: dict, news_items: list, a
     fields = [
         {"name": "📊 US Index Futures (เช้าเอเชีย)", "value": _truncate("\n".join(futures)), "inline": False},
         {"name": "📈 ตัวชี้วัดตลาดสำคัญ ", "value": _truncate("\n".join(indicators)), "inline": False},
-        {"name": "🟢 ปัจจัยบวกต่อตลาด ", "value": _truncate(_lines(ai_summary.get("drivers_th", []))), "inline": True},
-        {"name": "🔴 ปัจจัยกดดันตลาด ", "value": _truncate(_lines(ai_summary.get("risks_th", []))), "inline": True},
+        # {"name": "🟢 ปัจจัยบวกต่อตลาด ", "value": _truncate(_lines(ai_summary.get("drivers_th", []))), "inline": True},
+        # {"name": "🔴 ปัจจัยกดดันตลาด ", "value": _truncate(_lines(ai_summary.get("risks_th", []))), "inline": True},
         {"name": section_name, "value": _truncate(_lines(section_items)), "inline": False},
         {"name": "💻 ความเคลื่อนไหว Big Tech & AI", "value": _news_value(ai_summary.get("big_tech_news", []), "ไม่พบข่าว Big Tech ที่ผ่านการคัดเลือกในช่วงเวลานี้"), "inline": False},
         # {"name": "🌍 ข่าวตลาดโลก", "value": _news_value(ai_summary.get("global_market_news", []), "ไม่พบข่าวต่างประเทศที่ผ่านการคัดเลือกในช่วงเวลานี้"), "inline": False},
