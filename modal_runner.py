@@ -19,7 +19,7 @@ image = (
 # ตั้งเวลา Cron (UTC): 23:05, 05:05, 11:05, 13:05 UTC = 06:05, 12:05, 18:05, 20:05 น. (เวลาไทย)
 @app.function(
     image=image,
-    schedule=modal.Cron("0 5,11,13,23 * * *"),
+    schedule=modal.Cron("0 23 * * 0-4"),  # รันเฉพาะจันทร์-ศุกร์ เวลา 06:00 น. (เวลาไทย)
     secrets=[modal.Secret.from_name("bot-secrets")],  # เรียกใช้ Secret ที่เราสร้างไว้
     timeout=300
 )
