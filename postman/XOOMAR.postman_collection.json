@@ -1,0 +1,79 @@
+{
+  "info": {
+    "name": "XOOMAR \u2014 free US economic calendar",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "No key or authentication. GET-only requests; no Discord posts. The dated request matches the bot's UTC range and returns a superset; the bot filters exact Bangkok boundaries locally."
+  },
+  "variable": [
+    {
+      "key": "from_date",
+      "value": ""
+    },
+    {
+      "key": "to_date",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const shifted = new Date(Date.now() + 7 * 3600000);",
+          "const day = new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()));",
+          "const monday = new Date(day.getTime() - ((day.getUTCDay() + 6) % 7) * 86400000);",
+          "const lower = new Date(monday.getTime() - 7 * 3600000);",
+          "pm.variables.set(\"start\", pm.collectionVariables.get(\"from_date\") || lower.toISOString().slice(0,10));",
+          "pm.variables.set(\"end\", pm.collectionVariables.get(\"to_date\") || new Date(lower.getTime() + 7 * 86400000).toISOString().slice(0,10));"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+          "pm.test(\"Calendar data is an array\", () => pm.expect(pm.response.json().data).to.be.an(\"array\"));"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Default US calendar",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "https://xoomar.com/api/markets/calendar"
+      },
+      "response": []
+    },
+    {
+      "name": "2. Current Bangkok week \u2014 bot date parameters",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "https://xoomar.com/api/markets/calendar?from={{start}}&to={{end}}"
+      },
+      "response": []
+    }
+  ]
+}

@@ -13,10 +13,10 @@ image = (
         "python-dateutil>=2.9.0",
         "pytz>=2024.1",
     )
-    .add_local_dir(".", remote_path="/root")  # ซิงค์โค้ดในโฟลเดอร์ขึ้น Cloud
+    .add_local_python_source("src", "main", "calendar_runner")
 )
 
-# ตั้งเวลา Cron (UTC): 23:05, 05:05, 11:05, 13:05 UTC = 06:05, 12:05, 18:05, 20:05 น. (เวลาไทย)
+# Market brief: Monday–Friday at 06:00 Bangkok.
 @app.function(
     image=image,
     schedule=modal.Cron("0 23 * * 0-4"),  # รันเฉพาะจันทร์-ศุกร์ เวลา 06:00 น. (เวลาไทย)
@@ -35,3 +35,25 @@ def scheduled_run():
 @app.local_entrypoint()
 def test():
     scheduled_run.remote()
+
+# Calendar: Monday at 06:00 Bangkok.
+calendar_volume = modal.Volume.from_name("economic-calendar-state", create_if_missing=True)
+
+
+@app.function(
+    image=image,
+    schedule=modal.Cron("0 6 * * 1", timezone="Asia/Bangkok"),
+    secrets=[modal.Secret.from_name("bot-secrets")],
+    volumes={"/calendar-state": calendar_volume},
+    max_containers=1,
+    timeout=300,
+)
+def scheduled_calendar(dry_run: bool = False, test_send: bool = False, manual_send: bool = False):
+    import os
+    import sys
+    sys.path.append("/root")
+    if not (dry_run or test_send):
+        calendar_volume.reload()
+    os.environ["CALENDAR_STATE_PATH"] = "/calendar-state/state.json"
+    from calendar_runner import run_calendar
+    run_calendar(checkpoint=calendar_volume.commit, dry_run=dry_run, test_send=test_send, manual_send=manual_send)

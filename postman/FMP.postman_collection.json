@@ -1,0 +1,163 @@
+{
+  "info": {
+    "name": "FMP \u2014 standalone economic calendar diagnostics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "GET-only FMP diagnostics independent of Modal and Discord. Set your key locally in the companion environment. Run requests in order and inspect the response body; do not share keys or full authenticated request URLs."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://financialmodelingprep.com/stable",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.environment.get(\"FMP_API_KEY\")) {",
+          "    throw new Error(\"Set FMP_API_KEY in the selected Postman environment before sending.\");",
+          "}",
+          "// Bangkok is UTC+7 year round. Compute Monday in Bangkok, then UTC dates.",
+          "const shifted = new Date(Date.now() + 7 * 60 * 60 * 1000);",
+          "const day = new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()));",
+          "const monday = new Date(day.getTime() - ((day.getUTCDay() + 6) % 7) * 86400000);",
+          "const utcStart = new Date(monday.getTime() - 7 * 3600000);",
+          "const utcEnd = new Date(utcStart.getTime() + 7 * 86400000);",
+          "if (!pm.environment.get(\"from_date\")) pm.variables.set(\"from_date\", utcStart.toISOString().slice(0, 10));",
+          "if (!pm.environment.get(\"to_date\")) pm.variables.set(\"to_date\", utcEnd.toISOString().slice(0, 10));"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"HTTP 200 (inspect response body when this fails)\", function () {",
+          "    pm.expect(pm.response.code).to.eql(200);",
+          "});",
+          "pm.test(\"Successful response is a JSON array\", function () {",
+          "    if (pm.response.code === 200) {",
+          "        pm.expect(pm.response.json()).to.be.an(\"array\");",
+          "    } else {",
+          "        pm.expect.fail(\"HTTP \" + pm.response.code + \": inspect the response Body for FMP's explanation.\");",
+          "    }",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Basic key check \u2014 symbol search",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": {
+          "raw": "{{base_url}}/search-symbol?query=AAPL&apikey={{FMP_API_KEY}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "search-symbol"
+          ],
+          "query": [
+            {
+              "key": "query",
+              "value": "AAPL"
+            },
+            {
+              "key": "apikey",
+              "value": "{{FMP_API_KEY}}"
+            }
+          ]
+        },
+        "description": "Checks a documented basic endpoint. A 200 here demonstrates this key works for symbol search; it does not establish calendar access."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Calendar \u2014 default parameters",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": {
+          "raw": "{{base_url}}/economic-calendar?apikey={{FMP_API_KEY}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "economic-calendar"
+          ],
+          "query": [
+            {
+              "key": "apikey",
+              "value": "{{FMP_API_KEY}}"
+            }
+          ]
+        },
+        "description": "Tests calendar endpoint access without explicit date filters. Compare the full error response with request 3."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Calendar \u2014 bot date parameters",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": {
+          "raw": "{{base_url}}/economic-calendar?from={{from_date}}&to={{to_date}}&apikey={{FMP_API_KEY}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "economic-calendar"
+          ],
+          "query": [
+            {
+              "key": "from",
+              "value": "{{from_date}}"
+            },
+            {
+              "key": "to",
+              "value": "{{to_date}}"
+            },
+            {
+              "key": "apikey",
+              "value": "{{FMP_API_KEY}}"
+            }
+          ]
+        },
+        "description": "Matches the bot endpoint and from/to parameters. Country filtering happens locally in the bot. Default dates are calculated for the current Bangkok week and converted to UTC date boundaries."
+      },
+      "response": []
+    }
+  ]
+}
